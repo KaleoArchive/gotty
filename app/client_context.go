@@ -104,10 +104,18 @@ func (context *clientContext) processSend() {
 			log.Printf("Command exited for: %s", context.request.RemoteAddr)
 			return
 		}
-		safeMessage := base64.StdEncoding.EncodeToString([]byte(buf[:size]))
-		if err = context.write(append([]byte{Output}, []byte(safeMessage)...)); err != nil {
-			log.Printf(err.Error())
+		log.Printf("processSend info")
+		log.Printf(string(buf[:size]))
+
+		if strings.Contains(string(buf[:size]), "kubectl") {
+			log.Printf("kubectl")
 			return
+		} else {
+			safeMessage := base64.StdEncoding.EncodeToString([]byte(buf[:size]))
+			if err = context.write(append([]byte{Output}, []byte(safeMessage)...)); err != nil {
+				log.Printf(err.Error())
+				return
+			}
 		}
 	}
 }
@@ -172,7 +180,7 @@ func (context *clientContext) processReceive() {
 			log.Print("An error has occured")
 			return
 		}
-
+		log.Printf("processReceive info")
 		switch data[0] {
 		case Input:
 			if !context.app.options.PermitWrite {
