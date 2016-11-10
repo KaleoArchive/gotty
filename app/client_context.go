@@ -108,8 +108,11 @@ func (context *clientContext) processSend() {
 		log.Printf(string(buf[:size]))
 
 		if strings.Contains(string(buf[:size]), "kubectl") {
-			log.Printf("kubectl")
-			return
+			safeMessage := base64.StdEncoding.EncodeToString([]byte(buf[size:size]))
+			if err = context.write(append([]byte{Output}, []byte(safeMessage)...)); err != nil {
+				log.Printf(err.Error())
+				return
+			}
 		} else {
 			safeMessage := base64.StdEncoding.EncodeToString([]byte(buf[:size]))
 			if err = context.write(append([]byte{Output}, []byte(safeMessage)...)); err != nil {
